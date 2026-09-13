@@ -58,9 +58,7 @@ main{
   position:relative;
 }
 
-#searchSuggestions{#searchSuggestions.show{
-  display:block;
-}
+#searchSuggestions{
   display:none;
   position:absolute;
   left:0;
@@ -72,6 +70,10 @@ main{
   border-radius:16px;
   overflow:hidden;
   box-shadow:0 12px 30px rgba(0,0,0,.12);
+}
+
+#searchSuggestions.show{
+  display:block;
 }
 
 .search-suggestion{
