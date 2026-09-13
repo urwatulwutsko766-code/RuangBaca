@@ -1,5 +1,5 @@
 *{box-sizing:border-box}
-:root{--bg:#f5f3ee;--surface:#fffdfa;--text:#171716;--muted:#77756f;--line:#e7e3db;--accent:#315c4b;--accent-soft:#e5eee9}
+:root{--bg:#f5f3ee;--surface:#fffdfa;--text:#171716;--muted:#77756f;--line:#e7e3db;--accent:#2563eb;--accent-soft:#e8f0ff}
 html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
 button,input{font:inherit}button{border:0;background:none;color:inherit;cursor:pointer}
 .app{max-width:540px;margin:auto;min-height:100vh;padding-bottom:94px}
