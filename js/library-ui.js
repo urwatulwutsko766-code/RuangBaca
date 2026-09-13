@@ -37,7 +37,16 @@ let searchSuggestions = document.getElementById('searchSuggestions');
 if(!searchSuggestions){
   searchSuggestions = document.createElement('div');
   searchSuggestions.id = 'searchSuggestions';
-  searchWrap.appendChild(searchSuggestions);
+  document.body.appendChild(searchSuggestions);
+}
+
+function positionSearchSuggestions(){
+  const rect = searchInput.closest('.search').getBoundingClientRect();
+
+  searchSuggestions.style.position = 'fixed';
+  searchSuggestions.style.left = rect.left + 'px';
+  searchSuggestions.style.top = (rect.bottom + 8) + 'px';
+  searchSuggestions.style.width = rect.width + 'px';
 }
 
 function getSearchResults(q){
