@@ -67,9 +67,13 @@ $$('[data-action="reader-theme"]').forEach(btn =>
   }
 
   function setTransform(value){
-    movingParts.forEach(el => {
+  movingParts.forEach(el => {
+    if(el === bottom){
+      el.style.transform = `translateX(-50%) ${value}`;
+    }else{
       el.style.transform = value;
-    });
+    }
+  });
   }
 
   function clearTransform(){
