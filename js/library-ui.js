@@ -75,7 +75,8 @@ function hideSearchSuggestions(){
 }
 
 function showSearchSuggestions(results){
-
+positionSearchSuggestions();
+  
   if(!results.length){
     searchSuggestions.innerHTML = `
       <div class="search-empty">
