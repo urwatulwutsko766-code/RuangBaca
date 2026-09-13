@@ -29,7 +29,7 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 );
 
 /* =========================================================
-   RuangBaca v2.1 — FULL PAGE SWIPE
+   RuangBaca v2.1 — FULL PAGE SWIPE FIX
    Beranda <-> Perpustakaan <-> Profil
    ========================================================= */
 
@@ -41,17 +41,25 @@ $$('[data-action="reader-theme"]').forEach(btn =>
   let startY = 0;
   let tracking = false;
 
-  document.addEventListener('touchstart', function(e){
+  const app = document.querySelector('.app');
+
+  if(!app) return;
+
+  app.addEventListener('touchstart', function(e){
 
     if(!e.touches.length) return;
 
     const target = e.target;
 
-    /* Jangan ganggu input, tombol, carousel, filter,
-       reader, atau modal */
-    if(target.closest(
-      'input, button, .horizontal, .chips, .reader, .modal'
-    )){
+    /* Jangan ganggu elemen interaktif */
+    if(
+      target.closest('input') ||
+      target.closest('button') ||
+      target.closest('.horizontal') ||
+      target.closest('.chips') ||
+      target.closest('.reader') ||
+      target.closest('.modal')
+    ){
       tracking = false;
       return;
     }
@@ -60,19 +68,14 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     if(!active) return;
 
-    const currentIndex = pages.indexOf(active.id);
-
-    if(currentIndex === -1) return;
-
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
-
     tracking = true;
 
   }, {passive:true});
 
 
-  document.addEventListener('touchend', function(e){
+  app.addEventListener('touchend', function(e){
 
     if(!tracking || !e.changedTouches.length){
       tracking = false;
@@ -87,10 +90,10 @@ $$('[data-action="reader-theme"]').forEach(btn =>
     const dx = endX - startX;
     const dy = endY - startY;
 
-    /* Harus benar-benar swipe horizontal */
+    /* Pastikan gerakannya horizontal */
     if(
-      Math.abs(dx) < 70 ||
-      Math.abs(dx) < Math.abs(dy) * 1.3
+      Math.abs(dx) < 60 ||
+      Math.abs(dx) < Math.abs(dy) * 1.2
     ){
       return;
     }
@@ -105,20 +108,18 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     let nextIndex = currentIndex;
 
-    /* Usap kiri */
+    /* Swipe kiri */
     if(dx < 0 && currentIndex < pages.length - 1){
       nextIndex = currentIndex + 1;
     }
 
-    /* Usap kanan */
+    /* Swipe kanan */
     if(dx > 0 && currentIndex > 0){
       nextIndex = currentIndex - 1;
     }
 
-    /* Tidak ada halaman berikutnya */
+    /* Sudah di halaman paling ujung */
     if(nextIndex === currentIndex) return;
-
-    const nextPage = pages[nextIndex];
 
     /* Tentukan arah animasi */
     if(nextIndex > currentIndex){
@@ -127,15 +128,16 @@ $$('[data-action="reader-theme"]').forEach(btn =>
       document.body.classList.add('rb-swipe-right');
     }
 
-    showPage(nextPage);
+    showPage(pages[nextIndex]);
 
-    /* Hapus class setelah animasi selesai */
     setTimeout(function(){
+
       document.body.classList.remove(
         'rb-swipe-left',
         'rb-swipe-right'
       );
-    }, 260);
+
+    }, 300);
 
   }, {passive:true});
 
