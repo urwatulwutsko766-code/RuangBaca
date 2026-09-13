@@ -29,7 +29,7 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 );
 
 /* =========================================================
-   RuangBaca v2.2 — INTERACTIVE NATIVE SWIPE
+   RuangBaca v2.3 — FULL SCREEN NATIVE SWIPE
    Home <-> Library <-> Profile
    ========================================================= */
 
@@ -37,8 +37,14 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
   const pages = ['home','library','profile'];
   const app = document.querySelector('.app');
+  const main = document.querySelector('main');
+  const top = document.querySelector('.top');
+  const fab = document.querySelector('.fab');
+  const bottom = document.querySelector('.bottom');
 
-  if(!app) return;
+  if(!app || !main) return;
+
+  const movingParts = [top, main, fab, bottom].filter(Boolean);
 
   let startX = 0;
   let startY = 0;
@@ -47,12 +53,12 @@ $$('[data-action="reader-theme"]').forEach(btn =>
   let currentPage = null;
   let nextPage = null;
 
-  let currentIndex = -1;
   let nextIndex = -1;
-
   let direction = 0;
+
   let dragging = false;
   let horizontal = false;
+  let movedEnough = false;
 
   let raf = 0;
 
@@ -60,23 +66,37 @@ $$('[data-action="reader-theme"]').forEach(btn =>
     return document.querySelector('.page.active');
   }
 
-  function prepare(directionValue){
+  function setTransform(value){
+    movingParts.forEach(el => {
+      el.style.transform = value;
+    });
+  }
+
+  function clearTransform(){
+    movingParts.forEach(el => {
+      el.style.transform = '';
+      el.style.transition = '';
+      el.style.willChange = '';
+    });
+  }
+
+  function prepare(dir){
 
     currentPage = getActive();
 
     if(!currentPage) return false;
 
-    currentIndex = pages.indexOf(currentPage.id);
+    const currentIndex = pages.indexOf(currentPage.id);
 
     if(currentIndex < 0) return false;
 
-    nextIndex =
-      directionValue < 0
-        ? currentIndex + 1
-        : currentIndex - 1;
+    nextIndex = dir < 0
+      ? currentIndex + 1
+      : currentIndex - 1;
 
     if(nextIndex < 0 || nextIndex >= pages.length){
       nextPage = null;
+      direction = dir;
       return false;
     }
 
@@ -84,26 +104,31 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     if(!nextPage) return false;
 
-    direction = directionValue;
+    direction = dir;
 
-    const top = currentPage.offsetTop;
+    const width = app.clientWidth || window.innerWidth;
 
+    /*
+      Next page masuk dari sisi layar.
+      Main ikut bergerak bersama header, FAB dan bottom nav.
+    */
     nextPage.style.display = 'block';
     nextPage.style.position = 'absolute';
-    nextPage.style.top = top + 'px';
+    nextPage.style.top = currentPage.offsetTop + 'px';
     nextPage.style.left = '0';
     nextPage.style.width = '100%';
     nextPage.style.zIndex = '5';
     nextPage.style.willChange = 'transform';
 
-    currentPage.style.willChange = 'transform';
-
-    const width = app.clientWidth || window.innerWidth;
-
     nextPage.style.transform =
-      `translate3d(${direction < 0 ? width : -width}px,0,0)`;
+      `translate3d(${dir < 0 ? width : -width}px,0,0)`;
+
+    movingParts.forEach(el => {
+      el.style.willChange = 'transform';
+    });
 
     app.classList.add('rb-swiping');
+    document.body.style.overflowX = 'hidden';
 
     return true;
   }
@@ -112,39 +137,36 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     raf = 0;
 
-    if(!dragging || !horizontal || !currentPage) return;
-
-    const distance = currentX - startX;
+    if(!dragging || !horizontal) return;
 
     const width = app.clientWidth || window.innerWidth;
+    const distance = currentX - startX;
 
     let move = distance;
 
     /*
-      Resistance ketika sudah berada di ujung.
+      Resistance di ujung Home/Profile.
     */
     if(!nextPage){
+
       move = distance * 0.22;
 
-      currentPage.style.transform =
-        `translate3d(${move}px,0,0)`;
+      setTransform(`translate3d(${move}px,0,0)`);
 
       return;
     }
 
     /*
-      Halaman utama mengikuti jari.
+      Seluruh layar mengikuti jari.
     */
-    currentPage.style.transform =
-      `translate3d(${move}px,0,0)`;
+    setTransform(`translate3d(${move}px,0,0)`);
 
     /*
-      Halaman berikutnya ikut masuk dari sisi layar.
+      Halaman berikutnya ikut masuk.
     */
-    const nextOffset =
-      direction < 0
-        ? width + move
-        : -width + move;
+    const nextOffset = direction < 0
+      ? width + move
+      : -width + move;
 
     nextPage.style.transform =
       `translate3d(${nextOffset}px,0,0)`;
@@ -159,10 +181,7 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
   function cleanup(){
 
-    if(currentPage){
-      currentPage.style.transform = '';
-      currentPage.style.willChange = '';
-    }
+    clearTransform();
 
     if(nextPage){
 
@@ -177,12 +196,16 @@ $$('[data-action="reader-theme"]').forEach(btn =>
     }
 
     app.classList.remove('rb-swiping');
+    document.body.style.overflowX = '';
 
     currentPage = null;
     nextPage = null;
-    currentIndex = -1;
     nextIndex = -1;
     direction = 0;
+
+    dragging = false;
+    horizontal = false;
+    movedEnough = false;
   }
 
   function finish(){
@@ -195,42 +218,34 @@ $$('[data-action="reader-theme"]').forEach(btn =>
     const width = app.clientWidth || window.innerWidth;
     const distance = currentX - startX;
 
+    const threshold =
+      Math.max(42, width * 0.18);
+
+    const passed =
+      Math.abs(distance) >= threshold;
+
     /*
-      Threshold ringan supaya swipe terasa responsif.
+      Tidak cukup jauh -> kembali ke posisi awal.
     */
-    const passedDistance =
-      Math.abs(distance) >= Math.max(28, width * 0.16);
+    if(!nextPage || !passed){
 
-    if(!nextPage || !passedDistance){
+      movingParts.forEach(el => {
+        el.style.transition =
+          'transform .22s cubic-bezier(.22,.8,.25,1)';
+      });
 
-      currentPage.style.transition =
-        'transform .18s cubic-bezier(.22,.8,.25,1)';
-
-      currentPage.style.transform =
-        'translate3d(0,0,0)';
+      setTransform('translate3d(0,0,0)');
 
       if(nextPage){
 
         nextPage.style.transition =
-          'transform .18s cubic-bezier(.22,.8,.25,1)';
+          'transform .22s cubic-bezier(.22,.8,.25,1)';
 
         nextPage.style.transform =
           `translate3d(${direction < 0 ? width : -width}px,0,0)`;
       }
 
-      setTimeout(function(){
-
-        if(currentPage){
-          currentPage.style.transition = '';
-        }
-
-        if(nextPage){
-          nextPage.style.transition = '';
-        }
-
-        cleanup();
-
-      }, 190);
+      setTimeout(cleanup,230);
 
       return;
     }
@@ -238,52 +253,77 @@ $$('[data-action="reader-theme"]').forEach(btn =>
     /*
       Selesaikan perpindahan.
     */
-    currentPage.style.transition =
-      'transform .16s cubic-bezier(.22,.8,.25,1)';
+    movingParts.forEach(el => {
+      el.style.transition =
+        'transform .18s cubic-bezier(.22,.8,.25,1)';
+    });
 
-    currentPage.style.transform =
-      `translate3d(${direction < 0 ? -width : width}px,0,0)`;
+    setTransform(
+      `translate3d(${direction < 0 ? -width : width}px,0,0)`
+    );
 
     nextPage.style.transition =
-      'transform .16s cubic-bezier(.22,.8,.25,1)';
+      'transform .18s cubic-bezier(.22,.8,.25,1)';
 
     nextPage.style.transform =
       'translate3d(0,0,0)';
 
     setTimeout(function(){
 
-      showPage(pages[nextIndex]);
+      const targetPage = pages[nextIndex];
+
+      /*
+        showPage tetap dipakai supaya sistem navigasi
+        lama tidak rusak.
+      */
+      showPage(targetPage);
 
       cleanup();
 
-    }, 160);
+    },190);
   }
 
   app.addEventListener('touchstart', function(e){
 
     if(!e.touches.length) return;
 
-    const target = e.target;
-
-    /*
-      Area yang punya gesture sendiri.
-    */
-    if(
-      target.closest('input') ||
-      target.closest('button') ||
-      target.closest('.horizontal') ||
-      target.closest('.chips') ||
-      target.closest('.reader') ||
-      target.closest('.modal')
-    ){
-      dragging = false;
-      horizontal = false;
-      return;
-    }
-
     const active = getActive();
 
     if(!active) return;
+
+    const target = e.target;
+
+    /*
+      Reader dan modal punya gesture sendiri.
+    */
+    if(
+      target.closest('.reader') ||
+      target.closest('.modal') ||
+      target.closest('input')
+    ){
+      return;
+    }
+
+    /*
+      HOME:
+      Cover "Lanjutkan membaca" dikecualikan.
+      Carousel rekomendasi juga dikecualikan.
+    */
+    if(active.id === 'home'){
+
+      if(
+        target.closest('.continue-book') ||
+        target.closest('.horizontal')
+      ){
+        return;
+      }
+    }
+
+    /*
+      Library:
+      CARD BUKU TIDAK DI-BLOCK.
+      Kita bedakan TAP vs SWIPE saat touchmove.
+    */
 
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
@@ -293,6 +333,7 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     dragging = true;
     horizontal = false;
+    movedEnough = false;
 
   }, {passive:true});
 
@@ -309,15 +350,21 @@ $$('[data-action="reader-theme"]').forEach(btn =>
     const dy = currentY - startY;
 
     /*
-      Tentukan arah gesture.
-      Gerakan vertikal tetap menjadi scroll.
+      Tunggu sampai arah gesture cukup jelas.
     */
     if(!horizontal){
 
-      if(Math.abs(dx) < 8 && Math.abs(dy) < 8){
+      if(
+        Math.abs(dx) < 8 &&
+        Math.abs(dy) < 8
+      ){
         return;
       }
 
+      /*
+        Gesture vertikal:
+        biarkan browser melakukan scroll normal.
+      */
       if(Math.abs(dy) > Math.abs(dx) * 1.15){
 
         dragging = false;
@@ -326,9 +373,17 @@ $$('[data-action="reader-theme"]').forEach(btn =>
         return;
       }
 
+      /*
+        Gesture horizontal.
+      */
       if(Math.abs(dx) > Math.abs(dy)){
 
+        /*
+          Cover Home dan carousel sudah dikecualikan
+          sejak touchstart.
+        */
         horizontal = true;
+        movedEnough = true;
 
         prepare(dx < 0 ? -1 : 1);
 
@@ -346,6 +401,7 @@ $$('[data-action="reader-theme"]').forEach(btn =>
   app.addEventListener('touchend', function(){
 
     if(!dragging){
+
       cleanup();
       return;
     }
@@ -353,8 +409,11 @@ $$('[data-action="reader-theme"]').forEach(btn =>
     dragging = false;
 
     if(horizontal){
+
       finish();
+
     }else{
+
       cleanup();
     }
 
@@ -363,13 +422,9 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
   app.addEventListener('touchcancel', function(){
 
-    dragging = false;
-    horizontal = false;
-
     cleanup();
 
   }, {passive:true});
 
-})();
 
-  
+})();
