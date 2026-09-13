@@ -156,3 +156,13 @@ main{
   pointer-events:auto;
   z-index:99999;
 }
+#searchSuggestions{
+  position:fixed !important;
+  z-index:999999 !important;
+  display:none;
+  pointer-events:auto;
+}
+
+#searchSuggestions.show{
+  display:block !important;
+}
