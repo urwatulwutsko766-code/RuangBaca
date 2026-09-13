@@ -1,0 +1,101 @@
+/* =========================================
+   RUANGBACA — READER PREFERENCES
+   Step 3A
+   ========================================= */
+
+/* Ukuran teks */
+.reader .article{
+  font-size:var(--reader-text-size,100%);
+}
+
+/* Font */
+html[data-reader-font="system"] .reader .article{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+html[data-reader-font="serif"] .reader .article{
+  font-family:Georgia,"Times New Roman",serif;
+}
+
+html[data-reader-font="sans"] .reader .article{
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+/* Jarak antar paragraf */
+html[data-reader-spacing="compact"] .reader .article p{
+  margin-bottom:14px;
+}
+
+html[data-reader-spacing="comfortable"] .reader .article p{
+  margin-bottom:28px;
+}
+
+html[data-reader-spacing="relaxed"] .reader .article p{
+  margin-bottom:38px;
+}
+
+/* Rata kanan-kiri */
+html[data-reader-justify="true"] .reader .article p{
+  text-align:justify;
+}
+
+html[data-reader-justify="false"] .reader .article p{
+  text-align:left;
+}
+
+/* Animasi halaman */
+html[data-reader-animation="false"] .reader,
+html[data-reader-animation="false"] .reader *{
+  scroll-behavior:auto !important;
+  transition:none !important;
+  animation:none !important;
+}
+
+/* Mode scroll */
+html[data-reader-scroll="paged"] .reader .article{
+  scroll-snap-type:y proximity;
+}
+
+html[data-reader-scroll="continuous"] .reader .article{
+  scroll-snap-type:none;
+}
+
+/* Tema Reader dari Profile */
+html[data-theme="dark"] .reader{
+  background:#151515;
+  color:#eeeeee;
+}
+
+html[data-theme="dark"] .reader .readerbar{
+  background:#151515;
+  color:#eeeeee;
+}
+
+html[data-theme="dark"] .reader .article{
+  background:#1d1d1d;
+  color:#eeeeee;
+}
+
+html[data-theme="sepia"] .reader{
+  background:#eee4d0;
+  color:#40382d;
+}
+
+html[data-theme="sepia"] .reader .readerbar{
+  background:#eee4d0;
+  color:#40382d;
+}
+
+html[data-theme="sepia"] .reader .article{
+  background:#f5ecd9;
+  color:#40382d;
+}
+
+/* Accent untuk tombol Reader */
+.reader .rbtn{
+  color:var(--accent,#3578e5);
+}
+
+html[data-theme="dark"] .reader .rbtn{
+  color:var(--accent,#3578e5);
+}
