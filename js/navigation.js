@@ -19,3 +19,11 @@ $$('[data-action="add"]').forEach(btn=>btn.addEventListener('click',openAdd));
 $$('[data-action="close-add"]').forEach(btn=>btn.addEventListener('click',closeAdd));
 $('#reader').addEventListener('click',(e)=>{if(e.target===e.currentTarget)closeReader()});
 
+function toggleReaderTheme(){
+  const reader = $('#reader');
+  reader.classList.toggle('dark');
+}
+
+$$('[data-action="reader-theme"]').forEach(btn =>
+  btn.addEventListener('click', toggleReaderTheme)
+);
