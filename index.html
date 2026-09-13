@@ -53,22 +53,104 @@
     </section>
 
     <section class="page" id="profile">
-      <div class="eyebrow">Akun</div>
-      <h1>Profil.</h1>
-      <div class="profile-head">
-        <div class="big-avatar">R</div>
-        <div><b>Pembaca RuangBaca</b><small>Koleksi pribadi</small></div>
-      </div>
-      <div class="stats">
-        <div class="stat"><b>12</b><small>Total buku</small></div>
-        <div class="stat"><b>7</b><small>Selesai</small></div>
-        <div class="stat"><b>18j</b><small>Waktu baca</small></div>
-      </div>
-      <div class="settings">
-        <button class="setting"><span class="sicon">Aa</span><span>Preferensi membaca<small>Ukuran teks, font, spasi</small></span><span class="chev">›</span></button>
-        <button class="setting"><span class="sicon">◐</span><span>Tampilan<small>Terang, gelap, dan sepia</small></span><span class="chev">›</span></button>
-        <button class="setting"><span class="sicon">i</span><span>Tentang RuangBaca<small>UI Layer v1</small></span><span class="chev">›</span></button>
-      </div>
+  <div class="eyebrow">Akun</div>
+  <h1>Profil.</h1>
+
+  <div class="profile-head profile-editable" id="profileEdit">
+    <div class="big-avatar" id="profileAvatar">R</div>
+    <div class="profile-name-wrap">
+      <b id="profileName">Pembaca RuangBaca</b>
+      <small id="profileSubtitle">Koleksi pribadi</small>
+    </div>
+    <span class="profile-edit-icon">✎</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="totalBooks">12</b><small>Total buku</small></div>
+    <div class="stat"><b id="doneBooks">7</b><small>Selesai</small></div>
+    <div class="stat"><b id="readingTime">18j</b><small>Waktu baca</small></div>
+  </div>
+
+  <div class="settings">
+
+    <button class="setting" data-profile-setting="reading">
+      <span class="sicon">Aa</span>
+      <span>
+        Preferensi membaca
+        <small>Ukuran teks, font, spasi, dan posisi</small>
+      </span>
+      <span class="chev">›</span>
+    </button>
+
+    <button class="setting" data-profile-setting="display">
+      <span class="sicon">◐</span>
+      <span>
+        Tampilan
+        <small>Terang, gelap, sepia, dan warna aksen</small>
+      </span>
+      <span class="chev">›</span>
+    </button>
+
+    <button class="setting" data-profile-setting="about">
+      <span class="sicon">i</span>
+      <span>
+        Tentang RuangBaca
+        <small>Informasi aplikasi dan versi</small>
+      </span>
+      <span class="chev">›</span>
+    </button>
+
+  </div>
+      <section class="page" id="profile">
+  <div class="eyebrow">Akun</div>
+  <h1>Profil.</h1>
+
+  <div class="profile-head profile-editable" id="profileEdit">
+    <div class="big-avatar" id="profileAvatar">R</div>
+    <div class="profile-name-wrap">
+      <b id="profileName">Pembaca RuangBaca</b>
+      <small id="profileSubtitle">Koleksi pribadi</small>
+    </div>
+    <span class="profile-edit-icon">✎</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b id="totalBooks">12</b><small>Total buku</small></div>
+    <div class="stat"><b id="doneBooks">7</b><small>Selesai</small></div>
+    <div class="stat"><b id="readingTime">18j</b><small>Waktu baca</small></div>
+  </div>
+
+  <div class="settings">
+
+    <button class="setting" data-profile-setting="reading">
+      <span class="sicon">Aa</span>
+      <span>
+        Preferensi membaca
+        <small>Ukuran teks, font, spasi, dan posisi</small>
+      </span>
+      <span class="chev">›</span>
+    </button>
+
+    <button class="setting" data-profile-setting="display">
+      <span class="sicon">◐</span>
+      <span>
+        Tampilan
+        <small>Terang, gelap, sepia, dan warna aksen</small>
+      </span>
+      <span class="chev">›</span>
+    </button>
+
+    <button class="setting" data-profile-setting="about">
+      <span class="sicon">i</span>
+      <span>
+        Tentang RuangBaca
+        <small>Informasi aplikasi dan versi</small>
+      </span>
+      <span class="chev">›</span>
+    </button>
+
+  </div>
+      </section>
     </section>
   </main>
 
