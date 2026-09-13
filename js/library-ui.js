@@ -29,10 +29,61 @@ document.getElementById('libraryFilters').addEventListener('click',(e)=>{
   document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
   btn.classList.add('active'); renderBooks(filtered(btn.dataset.filter));
 });
-document.getElementById('searchInput').addEventListener('input',(e)=>{
+const searchInput = document.getElementById('searchInput');
+
+searchInput.addEventListener('input',(e)=>{
   const q=e.target.value.trim().toLowerCase();
-  if(!q)return;
-  showPage('library');
-  renderBooks(RuangBacaUIBooks.filter(b=>(b.title+' '+b.author).toLowerCase().includes(q)));
+
+  let box = document.getElementById('searchSuggestions');
+
+  if(!box){
+    box = document.createElement('div');
+    box.id = 'searchSuggestions';
+    searchInput.closest('.search').appendChild(box);
+  }
+
+  if(!q){
+    box.innerHTML = '';
+    box.style.display = 'none';
+    return;
+  }
+
+  const results = RuangBacaUIBooks.filter(b =>
+    (b.title + ' ' + b.author)
+      .toLowerCase()
+      .includes(q)
+  );
+
+  box.innerHTML = results.length
+    ? results.slice(0,6).map((b,i)=>`
+        <button class="search-suggestion" data-index="${RuangBacaUIBooks.indexOf(b)}">
+          <div class="suggestion-cover ${b.className}">
+            <b>${b.title.charAt(0)}</b>
+          </div>
+          <div class="suggestion-info">
+            <strong>${b.title}</strong>
+            <small>${b.author}</small>
+          </div>
+        </button>
+      `).join('')
+    : `<div class="search-empty">Buku tidak ditemukan</div>`;
+
+  box.style.display = 'block';
 });
 
+document.addEventListener('click',(e)=>{
+  const item = e.target.closest('.search-suggestion');
+  if(!item) return;
+
+  const book = RuangBacaUIBooks[
+    Number(item.dataset.index)
+  ];
+
+  if(!book) return;
+
+  document.getElementById('searchSuggestions').style.display = 'none';
+  searchInput.blur();
+
+  showPage('library');
+  renderBooks([book]);
+});
