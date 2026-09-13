@@ -19,82 +19,22 @@ button,input{font:inherit}button{border:0;background:none;color:inherit;cursor:p
 @media(min-width:600px){body{background:#e9e8e3}.app{background:var(--bg);box-shadow:0 0 40px #00000010}}
 
 /* =========================================================
-   RuangBaca v2 — READER + NAVIGATION CSS PATCH
-   PATCH ONLY — CSS lama tetap dipertahankan
+   RuangBaca v2.2 — INTERACTIVE SWIPE PERFORMANCE
    ========================================================= */
 
-/* Animasi perpindahan halaman */
-.page.active{
-  animation:rbPageEnter .22s ease both;
+.app{
+  position:relative;
+  touch-action:pan-y;
 }
 
-@keyframes rbPageEnter{
-  from{
-    opacity:0;
-    transform:translateX(10px);
-  }
-  to{
-    opacity:1;
-    transform:translateX(0);
-  }
+.app.rb-swiping .page{
+  animation:none !important;
 }
 
-/* Ukuran teks Reader */
-.reader.rb-size-normal .article p{
-  font-size:18px;
+.app.rb-swiping .page.active{
+  will-change:transform;
 }
 
-.reader.rb-size-large .article p{
-  font-size:21px;
-}
-
-.reader.rb-size-xl .article p{
-  font-size:24px;
-}
-
-/* Tombol Reader terasa lebih responsif */
-.rbtn:active{
-  transform:scale(.94);
-}
-
-/* =========================================================
-   RuangBaca v2.1 — FULL PAGE SWIPE ANIMATION
-   ========================================================= */
-
-/* Matikan animasi lama ketika swipe
-   agar tidak terjadi dua animasi sekaligus */
-body.rb-swipe-left .page.active{
-  animation:rbSwipeLeft .26s ease-out both;
-}
-
-body.rb-swipe-right .page.active{
-  animation:rbSwipeRight .26s ease-out both;
-}
-
-
-/* Swipe ke kiri */
-@keyframes rbSwipeLeft{
-  from{
-    opacity:0;
-    transform:translateX(55px);
-  }
-
-  to{
-    opacity:1;
-    transform:translateX(0);
-  }
-}
-
-
-/* Swipe ke kanan */
-@keyframes rbSwipeRight{
-  from{
-    opacity:0;
-    transform:translateX(-55px);
-  }
-
-  to{
-    opacity:1;
-    transform:translateX(0);
-  }
+.app.rb-swiping .page:not(.active){
+  will-change:transform;
 }
