@@ -27,3 +27,79 @@ function toggleReaderTheme(){
 $$('[data-action="reader-theme"]').forEach(btn =>
   btn.addEventListener('click', toggleReaderTheme)
 );
+/* =========================================================
+   RuangBaca v2 — READER Aa + SWIPE PATCH
+   PATCH ONLY — kode lama tetap dipertahankan
+   ========================================================= */
+
+/* Reader Aa: normal -> besar -> ekstra besar -> normal */
+(function(){
+  const aa = $('#reader .readerbar > div .rbtn:last-child');
+  const reader = $('#reader');
+
+  if(!aa || !reader) return;
+
+  const sizes = [
+    'rb-size-normal',
+    'rb-size-large',
+    'rb-size-xl'
+  ];
+
+  let index = 0;
+
+  reader.classList.add(sizes[index]);
+
+  aa.addEventListener('click', function(){
+    reader.classList.remove(...sizes);
+
+    index = (index + 1) % sizes.length;
+    reader.classList.add(sizes[index]);
+  });
+})();
+
+/* Swipe Home <-> Library */
+(function(){
+  let startX = 0;
+  let startY = 0;
+
+  document.addEventListener('touchstart', function(e){
+    if(!e.touches.length) return;
+
+    const target = e.target;
+
+    if(target.closest('input, button, .horizontal, .chips, .reader, .modal')){
+      return;
+    }
+
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, {passive:true});
+
+  document.addEventListener('touchend', function(e){
+    if(!e.changedTouches.length) return;
+
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+
+    const dx = endX - startX;
+    const dy = endY - startY;
+
+    if(
+      Math.abs(dx) < 70 ||
+      Math.abs(dx) < Math.abs(dy) * 1.35
+    ){
+      return;
+    }
+
+    const active = $('.page.active');
+    if(!active) return;
+
+    if(active.id === 'home' && dx < 0){
+      showPage('library');
+    }
+
+    if(active.id === 'library' && dx > 0){
+      showPage('home');
+    }
+  }, {passive:true});
+})();
