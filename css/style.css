@@ -18,3 +18,41 @@ button,input{font:inherit}button{border:0;background:none;color:inherit;cursor:p
 @media(max-width:370px){h1{font-size:30px}.grid .cover{height:190px}.article p{font-size:17px}}
 @media(min-width:600px){body{background:#e9e8e3}.app{background:var(--bg);box-shadow:0 0 40px #00000010}}
 
+/* =========================================================
+   RuangBaca v2 — READER + NAVIGATION CSS PATCH
+   PATCH ONLY — CSS lama tetap dipertahankan
+   ========================================================= */
+
+/* Animasi perpindahan halaman */
+.page.active{
+  animation:rbPageEnter .22s ease both;
+}
+
+@keyframes rbPageEnter{
+  from{
+    opacity:0;
+    transform:translateX(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateX(0);
+  }
+}
+
+/* Ukuran teks Reader */
+.reader.rb-size-normal .article p{
+  font-size:18px;
+}
+
+.reader.rb-size-large .article p{
+  font-size:21px;
+}
+
+.reader.rb-size-xl .article p{
+  font-size:24px;
+}
+
+/* Tombol Reader terasa lebih responsif */
+.rbtn:active{
+  transform:scale(.94);
+}
