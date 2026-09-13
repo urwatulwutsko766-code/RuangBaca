@@ -29,14 +29,13 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 );
 
 /* =========================================================
-   RuangBaca v2.2 — INTERACTIVE SWIPE
-   Halaman mengikuti jari secara real-time
+   RuangBaca v2.2 — INTERACTIVE NATIVE SWIPE
    Home <-> Library <-> Profile
    ========================================================= */
 
 (function(){
 
-  const pages = ['home', 'library', 'profile'];
+  const pages = ['home','library','profile'];
   const app = document.querySelector('.app');
 
   if(!app) return;
@@ -45,23 +44,25 @@ $$('[data-action="reader-theme"]').forEach(btn =>
   let startY = 0;
   let currentX = 0;
 
+  let currentPage = null;
+  let nextPage = null;
+
+  let currentIndex = -1;
+  let nextIndex = -1;
+
+  let direction = 0;
   let dragging = false;
   let horizontal = false;
 
-  let currentPage = null;
-  let currentIndex = -1;
-  let nextPage = null;
-  let nextIndex = -1;
-
   let raf = 0;
 
-  function getActivePage(){
+  function getActive(){
     return document.querySelector('.page.active');
   }
 
-  function prepareNext(direction){
+  function prepare(directionValue){
 
-    currentPage = getActivePage();
+    currentPage = getActive();
 
     if(!currentPage) return false;
 
@@ -69,9 +70,10 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     if(currentIndex < 0) return false;
 
-    nextIndex = direction < 0
-      ? currentIndex + 1
-      : currentIndex - 1;
+    nextIndex =
+      directionValue < 0
+        ? currentIndex + 1
+        : currentIndex - 1;
 
     if(nextIndex < 0 || nextIndex >= pages.length){
       nextPage = null;
@@ -82,145 +84,179 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     if(!nextPage) return false;
 
+    direction = directionValue;
+
+    const top = currentPage.offsetTop;
+
     nextPage.style.display = 'block';
     nextPage.style.position = 'absolute';
-    nextPage.style.top = '0';
+    nextPage.style.top = top + 'px';
     nextPage.style.left = '0';
     nextPage.style.width = '100%';
-
-    nextPage.style.transform =
-      `translate3d(${direction < 0 ? '100%' : '-100%'},0,0)`;
-
+    nextPage.style.zIndex = '5';
     nextPage.style.willChange = 'transform';
 
     currentPage.style.willChange = 'transform';
 
+    const width = app.clientWidth || window.innerWidth;
+
+    nextPage.style.transform =
+      `translate3d(${direction < 0 ? width : -width}px,0,0)`;
+
+    app.classList.add('rb-swiping');
+
     return true;
   }
 
-  function renderSwipe(){
+  function update(){
 
     raf = 0;
 
-    if(!dragging || !horizontal || !nextPage) return;
+    if(!dragging || !horizontal || !currentPage) return;
 
     const distance = currentX - startX;
 
+    const width = app.clientWidth || window.innerWidth;
+
     let move = distance;
 
-    const direction = nextIndex > currentIndex ? -1 : 1;
+    /*
+      Resistance ketika sudah berada di ujung.
+    */
+    if(!nextPage){
+      move = distance * 0.22;
 
-    /* Resistance saat menarik halaman di ujung */
-    if(
-      (currentIndex === 0 && distance > 0) ||
-      (currentIndex === pages.length - 1 && distance < 0)
-    ){
-      move = distance * 0.25;
+      currentPage.style.transform =
+        `translate3d(${move}px,0,0)`;
+
+      return;
     }
 
+    /*
+      Halaman utama mengikuti jari.
+    */
     currentPage.style.transform =
       `translate3d(${move}px,0,0)`;
 
-    if(nextPage){
-      const width = app.clientWidth || window.innerWidth;
+    /*
+      Halaman berikutnya ikut masuk dari sisi layar.
+    */
+    const nextOffset =
+      direction < 0
+        ? width + move
+        : -width + move;
 
-      nextPage.style.transform =
-        `translate3d(${direction < 0
-          ? width + move
-          : -width + move}px,0,0)`;
-    }
+    nextPage.style.transform =
+      `translate3d(${nextOffset}px,0,0)`;
   }
 
-  function requestRender(){
+  function requestUpdate(){
 
     if(!raf){
-      raf = requestAnimationFrame(renderSwipe);
+      raf = requestAnimationFrame(update);
     }
   }
 
-  function resetPages(){
+  function cleanup(){
 
-    if(!currentPage) return;
-
-    currentPage.style.transform = '';
-    currentPage.style.willChange = '';
+    if(currentPage){
+      currentPage.style.transform = '';
+      currentPage.style.willChange = '';
+    }
 
     if(nextPage){
-      nextPage.style.transform = '';
+
+      nextPage.style.display = '';
       nextPage.style.position = '';
       nextPage.style.top = '';
       nextPage.style.left = '';
       nextPage.style.width = '';
+      nextPage.style.zIndex = '';
+      nextPage.style.transform = '';
       nextPage.style.willChange = '';
-      nextPage.style.display = '';
     }
+
+    app.classList.remove('rb-swiping');
 
     currentPage = null;
     nextPage = null;
+    currentIndex = -1;
+    nextIndex = -1;
+    direction = 0;
   }
 
-  function finishSwipe(){
+  function finish(){
 
-    const distance = currentX - startX;
-    const width = app.clientWidth || window.innerWidth;
-
-    const velocityEnough = Math.abs(distance) > 35;
-    const distanceEnough = Math.abs(distance) > width * 0.18;
-
-    const shouldChange =
-      horizontal &&
-      nextPage &&
-      (velocityEnough || distanceEnough);
-
-    if(!shouldChange){
-
-      if(currentPage){
-        currentPage.style.transition =
-          'transform .18s cubic-bezier(.22,.8,.25,1)';
-
-        currentPage.style.transform =
-          'translate3d(0,0,0)';
-      }
-
-      if(nextPage){
-        nextPage.style.transition =
-          'transform .18s cubic-bezier(.22,.8,.25,1)';
-
-        nextPage.style.transform =
-          `translate3d(${nextIndex > currentIndex
-            ? width
-            : -width}px,0,0)`;
-      }
-
-      setTimeout(resetPages, 190);
+    if(!currentPage){
+      cleanup();
       return;
     }
 
-    const direction = nextIndex > currentIndex ? -1 : 1;
+    const width = app.clientWidth || window.innerWidth;
+    const distance = currentX - startX;
 
-    if(currentPage){
+    /*
+      Threshold ringan supaya swipe terasa responsif.
+    */
+    const passedDistance =
+      Math.abs(distance) >= Math.max(28, width * 0.16);
+
+    if(!nextPage || !passedDistance){
+
       currentPage.style.transition =
         'transform .18s cubic-bezier(.22,.8,.25,1)';
 
       currentPage.style.transform =
-        `translate3d(${direction * width}px,0,0)`;
-    }
-
-    if(nextPage){
-      nextPage.style.transition =
-        'transform .18s cubic-bezier(.22,.8,.25,1)';
-
-      nextPage.style.transform =
         'translate3d(0,0,0)';
+
+      if(nextPage){
+
+        nextPage.style.transition =
+          'transform .18s cubic-bezier(.22,.8,.25,1)';
+
+        nextPage.style.transform =
+          `translate3d(${direction < 0 ? width : -width}px,0,0)`;
+      }
+
+      setTimeout(function(){
+
+        if(currentPage){
+          currentPage.style.transition = '';
+        }
+
+        if(nextPage){
+          nextPage.style.transition = '';
+        }
+
+        cleanup();
+
+      }, 190);
+
+      return;
     }
+
+    /*
+      Selesaikan perpindahan.
+    */
+    currentPage.style.transition =
+      'transform .16s cubic-bezier(.22,.8,.25,1)';
+
+    currentPage.style.transform =
+      `translate3d(${direction < 0 ? -width : width}px,0,0)`;
+
+    nextPage.style.transition =
+      'transform .16s cubic-bezier(.22,.8,.25,1)';
+
+    nextPage.style.transform =
+      'translate3d(0,0,0)';
 
     setTimeout(function(){
 
       showPage(pages[nextIndex]);
 
-      resetPages();
+      cleanup();
 
-    }, 190);
+    }, 160);
   }
 
   app.addEventListener('touchstart', function(e){
@@ -229,6 +265,9 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     const target = e.target;
 
+    /*
+      Area yang punya gesture sendiri.
+    */
     if(
       target.closest('input') ||
       target.closest('button') ||
@@ -237,10 +276,12 @@ $$('[data-action="reader-theme"]').forEach(btn =>
       target.closest('.reader') ||
       target.closest('.modal')
     ){
+      dragging = false;
+      horizontal = false;
       return;
     }
 
-    const active = getActivePage();
+    const active = getActive();
 
     if(!active) return;
 
@@ -250,6 +291,86 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     currentPage = active;
 
+    dragging = true;
+    horizontal = false;
+
+  }, {passive:true});
+
+
+  app.addEventListener('touchmove', function(e){
+
+    if(!dragging || !e.touches.length) return;
+
+    currentX = e.touches[0].clientX;
+
+    const currentY = e.touches[0].clientY;
+
+    const dx = currentX - startX;
+    const dy = currentY - startY;
+
+    /*
+      Tentukan arah gesture.
+      Gerakan vertikal tetap menjadi scroll.
+    */
+    if(!horizontal){
+
+      if(Math.abs(dx) < 8 && Math.abs(dy) < 8){
+        return;
+      }
+
+      if(Math.abs(dy) > Math.abs(dx) * 1.15){
+
+        dragging = false;
+        horizontal = false;
+
+        return;
+      }
+
+      if(Math.abs(dx) > Math.abs(dy)){
+
+        horizontal = true;
+
+        prepare(dx < 0 ? -1 : 1);
+
+        requestUpdate();
+      }
+
+      return;
+    }
+
+    requestUpdate();
+
+  }, {passive:true});
+
+
+  app.addEventListener('touchend', function(){
+
+    if(!dragging){
+      cleanup();
+      return;
+    }
+
+    dragging = false;
+
+    if(horizontal){
+      finish();
+    }else{
+      cleanup();
+    }
+
+  }, {passive:true});
+
+
+  app.addEventListener('touchcancel', function(){
+
+    dragging = false;
+    horizontal = false;
+
+    cleanup();
+
+  }, {passive:true});
+
+})();
     dragging = true;
     horizontal = false;
 
