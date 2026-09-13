@@ -29,21 +29,199 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 );
 
 /* =========================================================
-   RuangBaca v2.1 — FULL PAGE SWIPE FIX
-   Beranda <-> Perpustakaan <-> Profil
+   RuangBaca v2.2 — INTERACTIVE SWIPE
+   Halaman mengikuti jari secara real-time
+   Home <-> Library <-> Profile
    ========================================================= */
 
 (function(){
 
-  const pages = ['home','library','profile'];
-
-  let startX = 0;
-  let startY = 0;
-  let tracking = false;
-
+  const pages = ['home', 'library', 'profile'];
   const app = document.querySelector('.app');
 
   if(!app) return;
+
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+
+  let dragging = false;
+  let horizontal = false;
+
+  let currentPage = null;
+  let currentIndex = -1;
+  let nextPage = null;
+  let nextIndex = -1;
+
+  let raf = 0;
+
+  function getActivePage(){
+    return document.querySelector('.page.active');
+  }
+
+  function prepareNext(direction){
+
+    currentPage = getActivePage();
+
+    if(!currentPage) return false;
+
+    currentIndex = pages.indexOf(currentPage.id);
+
+    if(currentIndex < 0) return false;
+
+    nextIndex = direction < 0
+      ? currentIndex + 1
+      : currentIndex - 1;
+
+    if(nextIndex < 0 || nextIndex >= pages.length){
+      nextPage = null;
+      return false;
+    }
+
+    nextPage = document.getElementById(pages[nextIndex]);
+
+    if(!nextPage) return false;
+
+    nextPage.style.display = 'block';
+    nextPage.style.position = 'absolute';
+    nextPage.style.top = '0';
+    nextPage.style.left = '0';
+    nextPage.style.width = '100%';
+
+    nextPage.style.transform =
+      `translate3d(${direction < 0 ? '100%' : '-100%'},0,0)`;
+
+    nextPage.style.willChange = 'transform';
+
+    currentPage.style.willChange = 'transform';
+
+    return true;
+  }
+
+  function renderSwipe(){
+
+    raf = 0;
+
+    if(!dragging || !horizontal || !nextPage) return;
+
+    const distance = currentX - startX;
+
+    let move = distance;
+
+    const direction = nextIndex > currentIndex ? -1 : 1;
+
+    /* Resistance saat menarik halaman di ujung */
+    if(
+      (currentIndex === 0 && distance > 0) ||
+      (currentIndex === pages.length - 1 && distance < 0)
+    ){
+      move = distance * 0.25;
+    }
+
+    currentPage.style.transform =
+      `translate3d(${move}px,0,0)`;
+
+    if(nextPage){
+      const width = app.clientWidth || window.innerWidth;
+
+      nextPage.style.transform =
+        `translate3d(${direction < 0
+          ? width + move
+          : -width + move}px,0,0)`;
+    }
+  }
+
+  function requestRender(){
+
+    if(!raf){
+      raf = requestAnimationFrame(renderSwipe);
+    }
+  }
+
+  function resetPages(){
+
+    if(!currentPage) return;
+
+    currentPage.style.transform = '';
+    currentPage.style.willChange = '';
+
+    if(nextPage){
+      nextPage.style.transform = '';
+      nextPage.style.position = '';
+      nextPage.style.top = '';
+      nextPage.style.left = '';
+      nextPage.style.width = '';
+      nextPage.style.willChange = '';
+      nextPage.style.display = '';
+    }
+
+    currentPage = null;
+    nextPage = null;
+  }
+
+  function finishSwipe(){
+
+    const distance = currentX - startX;
+    const width = app.clientWidth || window.innerWidth;
+
+    const velocityEnough = Math.abs(distance) > 35;
+    const distanceEnough = Math.abs(distance) > width * 0.18;
+
+    const shouldChange =
+      horizontal &&
+      nextPage &&
+      (velocityEnough || distanceEnough);
+
+    if(!shouldChange){
+
+      if(currentPage){
+        currentPage.style.transition =
+          'transform .18s cubic-bezier(.22,.8,.25,1)';
+
+        currentPage.style.transform =
+          'translate3d(0,0,0)';
+      }
+
+      if(nextPage){
+        nextPage.style.transition =
+          'transform .18s cubic-bezier(.22,.8,.25,1)';
+
+        nextPage.style.transform =
+          `translate3d(${nextIndex > currentIndex
+            ? width
+            : -width}px,0,0)`;
+      }
+
+      setTimeout(resetPages, 190);
+      return;
+    }
+
+    const direction = nextIndex > currentIndex ? -1 : 1;
+
+    if(currentPage){
+      currentPage.style.transition =
+        'transform .18s cubic-bezier(.22,.8,.25,1)';
+
+      currentPage.style.transform =
+        `translate3d(${direction * width}px,0,0)`;
+    }
+
+    if(nextPage){
+      nextPage.style.transition =
+        'transform .18s cubic-bezier(.22,.8,.25,1)';
+
+      nextPage.style.transform =
+        'translate3d(0,0,0)';
+    }
+
+    setTimeout(function(){
+
+      showPage(pages[nextIndex]);
+
+      resetPages();
+
+    }, 190);
+  }
 
   app.addEventListener('touchstart', function(e){
 
@@ -51,7 +229,6 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
     const target = e.target;
 
-    /* Jangan ganggu elemen interaktif */
     if(
       target.closest('input') ||
       target.closest('button') ||
@@ -60,84 +237,94 @@ $$('[data-action="reader-theme"]').forEach(btn =>
       target.closest('.reader') ||
       target.closest('.modal')
     ){
-      tracking = false;
       return;
     }
 
-    const active = $('.page.active');
+    const active = getActivePage();
 
     if(!active) return;
 
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
-    tracking = true;
+    currentX = startX;
+
+    currentPage = active;
+
+    dragging = true;
+    horizontal = false;
 
   }, {passive:true});
 
 
-  app.addEventListener('touchend', function(e){
+  app.addEventListener('touchmove', function(e){
 
-    if(!tracking || !e.changedTouches.length){
-      tracking = false;
+    if(!dragging || !e.touches.length) return;
+
+    currentX = e.touches[0].clientX;
+
+    const currentY = e.touches[0].clientY;
+
+    const dx = currentX - startX;
+    const dy = currentY - startY;
+
+    /* Tentukan arah setelah gerakan cukup jelas */
+    if(!horizontal){
+
+      if(Math.abs(dx) < 8 && Math.abs(dy) < 8){
+        return;
+      }
+
+      if(Math.abs(dy) > Math.abs(dx) * 1.15){
+        dragging = false;
+        return;
+      }
+
+      if(Math.abs(dx) > Math.abs(dy)){
+        horizontal = true;
+
+        const direction = dx < 0 ? -1 : 1;
+
+        prepareNext(direction);
+
+        if(!nextPage){
+          /* Tetap izinkan resistance di ujung */
+          requestRender();
+          return;
+        }
+      }
+    }
+
+    if(horizontal){
+      requestRender();
+    }
+
+  }, {passive:true});
+
+
+  app.addEventListener('touchend', function(){
+
+    if(!dragging){
+      resetPages();
       return;
     }
 
-    tracking = false;
+    dragging = false;
 
-    const endX = e.changedTouches[0].clientX;
-    const endY = e.changedTouches[0].clientY;
-
-    const dx = endX - startX;
-    const dy = endY - startY;
-
-    /* Pastikan gerakannya horizontal */
-    if(
-      Math.abs(dx) < 60 ||
-      Math.abs(dx) < Math.abs(dy) * 1.2
-    ){
-      return;
-    }
-
-    const active = $('.page.active');
-
-    if(!active) return;
-
-    const currentIndex = pages.indexOf(active.id);
-
-    if(currentIndex === -1) return;
-
-    let nextIndex = currentIndex;
-
-    /* Swipe kiri */
-    if(dx < 0 && currentIndex < pages.length - 1){
-      nextIndex = currentIndex + 1;
-    }
-
-    /* Swipe kanan */
-    if(dx > 0 && currentIndex > 0){
-      nextIndex = currentIndex - 1;
-    }
-
-    /* Sudah di halaman paling ujung */
-    if(nextIndex === currentIndex) return;
-
-    /* Tentukan arah animasi */
-    if(nextIndex > currentIndex){
-      document.body.classList.add('rb-swipe-left');
+    if(horizontal){
+      finishSwipe();
     }else{
-      document.body.classList.add('rb-swipe-right');
+      resetPages();
     }
 
-    showPage(pages[nextIndex]);
+  }, {passive:true});
 
-    setTimeout(function(){
 
-      document.body.classList.remove(
-        'rb-swipe-left',
-        'rb-swipe-right'
-      );
+  app.addEventListener('touchcancel', function(){
 
-    }, 300);
+    dragging = false;
+    horizontal = false;
+
+    resetPages();
 
   }, {passive:true});
 
