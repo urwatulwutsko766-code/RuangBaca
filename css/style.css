@@ -137,3 +137,22 @@ main{
   color:var(--muted);
   font-size:13px;
 }
+
+/* Search dropdown visibility/layer fix */
+.page#home{
+  position:relative;
+  z-index:101;
+  overflow:visible;
+}
+
+.search{
+  position:relative;
+  z-index:1000;
+  overflow:visible;
+  isolation:isolate;
+}
+
+#searchSuggestions{
+  pointer-events:auto;
+  z-index:99999;
+}
