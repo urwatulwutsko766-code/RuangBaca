@@ -371,11 +371,6 @@ $$('[data-action="reader-theme"]').forEach(btn =>
   }, {passive:true});
 
 })();
-    dragging = true;
-    horizontal = false;
-
-  }, {passive:true});
-
 
   app.addEventListener('touchmove', function(e){
 
