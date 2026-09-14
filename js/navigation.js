@@ -45,7 +45,7 @@ $$('[data-action="reader-theme"]').forEach(btn =>
 
   if(!app || !main) return;
 
-  const movingParts = [top, main, fab, bottom].filter(Boolean);
+const movingParts = [main].filter(Boolean);
 
   let startX = 0;
   let startY = 0;
