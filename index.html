@@ -10,10 +10,243 @@
   <link rel="stylesheet" href="css/profile.css">
   <link rel="stylesheet" href="css/reader-preferences.css">
 </head>
+
 <body>
+
 <div class="app">
+
   <header class="top">
     <div class="brand">Ruang<span>Baca</span></div>
+    <div class="avatar">R</div>
+  </header>
+
+  <main>
+
+    <section class="page active" id="home">
+      <div class="eyebrow">Perpustakaan pribadi</div>
+      <h1>Selamat membaca.</h1>
+      <p class="intro">Temukan kembali cerita, ide, dan pengetahuan yang ingin kamu lanjutkan.</p>
+
+      <div class="search">
+        <span>⌕</span>
+        <input id="searchInput" placeholder="Cari judul atau penulis...">
+      </div>
+
+      <div class="section-title">
+        <h2>Lanjutkan membaca</h2>
+        <span>72%</span>
+      </div>
+
+      <button class="continue-book" data-action="reader">
+        <div class="mini-cover atomic">
+          <b>ATOMIC<br>HABITS</b>
+        </div>
+
+        <div class="continue-info">
+          <small>James Clear</small>
+          <strong>Atomic Habits</strong>
+          <div class="progress"><i></i></div>
+          <div class="pct">Bab 4 · lanjutkan membaca</div>
+        </div>
+      </button>
+
+      <div class="section-title">
+        <h2>Rekomendasi</h2>
+        <span>Lihat semua</span>
+      </div>
+
+      <div class="horizontal" id="recommendations"></div>
+    </section>
+
+
+    <section class="page" id="library">
+      <div class="eyebrow">Koleksi</div>
+      <h1>Perpustakaan.</h1>
+      <p class="intro">Semua buku yang kamu simpan, tersusun rapi di satu tempat.</p>
+
+      <div class="chips" id="libraryFilters">
+        <button class="chip active" data-filter="all">Semua</button>
+        <button class="chip" data-filter="reading">Sedang dibaca</button>
+        <button class="chip" data-filter="done">Selesai</button>
+        <button class="chip" data-filter="favorite">Favorit</button>
+      </div>
+
+      <div class="grid" id="libraryGrid"></div>
+    </section>
+
+
+    <section class="page" id="profile">
+
+      <div class="eyebrow">Akun</div>
+      <h1>Profil.</h1>
+
+      <div class="profile-head profile-editable" id="profileEdit">
+        <div class="big-avatar" id="profileAvatar">R</div>
+
+        <div class="profile-name-wrap">
+          <b id="profileName">Pembaca RuangBaca</b>
+          <small id="profileSubtitle">Koleksi pribadi</small>
+        </div>
+
+        <span class="profile-edit-icon">✎</span>
+      </div>
+
+
+      <div class="stats">
+        <div class="stat">
+          <b id="totalBooks">12</b>
+          <small>Total buku</small>
+        </div>
+
+        <div class="stat">
+          <b id="doneBooks">7</b>
+          <small>Selesai</small>
+        </div>
+
+        <div class="stat">
+          <b id="readingTime">18j</b>
+          <small>Waktu baca</small>
+        </div>
+      </div>
+
+
+      <div class="settings">
+
+        <button class="setting" data-profile-setting="reading">
+          <span class="sicon">Aa</span>
+
+          <span>
+            Preferensi membaca
+            <small>Ukuran teks, font, spasi, dan posisi</small>
+          </span>
+
+          <span class="chev">›</span>
+        </button>
+
+
+        <button class="setting" data-profile-setting="display">
+          <span class="sicon">◐</span>
+
+          <span>
+            Tampilan
+            <small>Terang, gelap, sepia, dan warna aksen</small>
+          </span>
+
+          <span class="chev">›</span>
+        </button>
+
+
+        <button class="setting" data-profile-setting="about">
+          <span class="sicon">i</span>
+
+          <span>
+            Tentang RuangBaca
+            <small>Informasi aplikasi dan versi</small>
+          </span>
+
+          <span class="chev">›</span>
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <button class="fab" data-action="add" aria-label="Tambah buku">+</button>
+
+
+  <nav class="bottom">
+
+    <button class="nav active" data-page="home">
+      <span class="ni">⌂</span>
+      Beranda
+    </button>
+
+    <button class="nav" data-page="library">
+      <span class="ni">▤</span>
+      Perpustakaan
+    </button>
+
+    <button class="nav" data-page="profile">
+      <span class="ni">◯</span>
+      Profil
+    </button>
+
+  </nav>
+
+</div>
+
+
+<div class="reader" id="reader">
+
+  <div class="readerbar">
+
+    <button class="rbtn" data-action="close-reader">←</button>
+
+    <span>Atomic Habits</span>
+
+    <div>
+      <button class="rbtn" data-action="reader-theme">◐</button>
+      <button class="rbtn">Aa</button>
+    </div>
+
+  </div>
+
+
+  <article class="article">
+
+    <div class="label">Bab 1</div>
+
+    <h2>Perubahan Kecil yang Mengubah Hidup</h2>
+
+    <p>
+      Ini adalah area reader sementara untuk menguji UI.
+      Mesin pembaca akan dipasang pada layer berikutnya.
+    </p>
+
+    <p>
+      Konten buku, impor file, penyimpanan, pencarian,
+      dan pengaturan reader tidak menjadi bagian dari UI layer ini.
+    </p>
+
+  </article>
+
+</div>
+
+
+<div class="modal" id="addModal">
+
+  <div class="modalbox">
+
+    <h2>Tambah buku</h2>
+
+    <p>
+      UI untuk proses impor. Fungsi impor akan dipasang terpisah.
+    </p>
+
+    <div class="filepick">
+      <button class="primary">Pilih file buku</button>
+      <small>PDF · TXT · EPUB</small>
+    </div>
+
+    <button class="cancel" data-action="close-add">
+      Batal
+    </button>
+
+  </div>
+
+</div>
+
+
+<script src="js/data.js"></script>
+<script src="js/navigation.js"></script>
+<script src="js/library-ui.js"></script>
+<script src="js/profile-ui.js"></script>
+
+</body>
+</html>
     <div class="avatar">R</div>
   </header>
 
